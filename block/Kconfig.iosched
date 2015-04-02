@@ -52,7 +52,6 @@ config IOSCHED_CFQ
 	  and low latency working environment, suitable for both desktop
 	  and server systems.
 
-	  This is the default I/O scheduler.
 
 config CFQ_GROUP_IOSCHED
 	bool "CFQ Group Scheduling support"
@@ -63,7 +62,7 @@ config CFQ_GROUP_IOSCHED
 
 choice
 	prompt "Default I/O scheduler"
-	default DEFAULT_CFQ
+	default DEFAULT_DEADLINE
 	help
 	  Select the I/O scheduler which will be used by default for all
 	  block devices.
