@@ -29,6 +29,7 @@
 #include <linux/regulator/machine.h>
 #include <linux/reboot.h>
 #include <linux/qpnp/qpnp-adc.h>
+#include <linux/blx.h>
 
 #define SMB135X_BITS_PER_REG	8
 
@@ -2761,7 +2762,13 @@ static void heartbeat_work(struct work_struct *work)
 				smb135x_set_appropriate_current(chip, USB);
 			}
 		}
-
+        
+#ifdef CONFIG_BLX
+        if(batt_soc >= get_charginglimit()){
+            chip->chg_done_batt_full = true;
+        }
+#endif
+        
 		if (!chip->chg_done_batt_full &&
 		    !chip->float_charge_start_time &&
 		    chip->iterm_disabled &&
@@ -2774,10 +2781,18 @@ static void heartbeat_work(struct work_struct *work)
 			chip->float_charge_start_time = 0;
 			chip->chg_done_batt_full = true;
 			dev_warn(chip->dev, "Float Done!\n");
-		} else if (chip->chg_done_batt_full && (batt_soc < 100)) {
-			chip->chg_done_batt_full = false;
-			dev_warn(chip->dev, "SOC dropped,  Charge Resume!\n");
 		}
+#ifdef CONFIG_BLX
+        //else if (chip->chg_done_batt_full && (batt_soc < 100)) {
+        //              chip->chg_done_batt_full = false;
+        //              dev_warn(chip->dev, "SOC dropped,  Charge Resume!\n");
+        //}
+#else
+        else if (chip->chg_done_batt_full && (batt_soc < 100)) {
+            chip->chg_done_batt_full = false;
+            dev_warn(chip->dev, "SOC dropped,  Charge Resume!\n");
+        }
+#endif
 	}
 
 	if ((batt_health == POWER_SUPPLY_HEALTH_WARM) ||
